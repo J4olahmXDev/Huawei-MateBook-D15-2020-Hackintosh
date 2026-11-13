@@ -1,74 +1,83 @@
+# Huawei MateBook D15 2020 (BOHB-WAX9) Hackintosh
 
------
+OpenCore EFI for the Huawei MateBook D15 2020 (BOHB-WAX9), running macOS Sonoma 14.8.9 (23J631).
 
-# Hackintosh EFI for Huawei Matebook D15 2020 (BOHB-WAX9)
+I previously used macOS Tahoe on this laptop, but several things weren't working at the time, especially Wi-Fi, Bluetooth and the Everest ESSX8336 audio codec.
 
-OpenCore EFI Configuration for **macOS Tahoe 26.1** on the Huawei Matebook D15 2020 (BOHB-WAX9).
+I've since moved to Sonoma and managed to get those features working, including AirDrop, without replacing any of the original hardware.
 
-##  
+## Hardware
 
-## 🚨 IMPORTANT: How to Use This EFI
+| Component | Specification |
+|---|---|
+| Model | Huawei MateBook D15 2020 (BOHB-WAX9) |
+| CPU | Intel Core i3-10110U @ 2.10 GHz |
+| GPU | Intel UHD Graphics (spoofed as Iris Plus Graphics 655) |
+| RAM | 8 GB DDR4 |
+| Wi-Fi | Intel Wireless-AC 9560 160MHz |
+| Audio | Everest ESSX8336 (Intel SST) |
+| Bootloader | OpenCore |
+| macOS | Sonoma 14.8.9 (23J631) |
 
-**You MUST generate your own SMBIOS values before using this EFI.**
+## What's Working
 
-Using the `PlatformInfo` values in the provided `config.plist` will cause issues with iServices and could get your Apple ID banned.
+- Native Wi-Fi through the macOS Wi-Fi menu, without HeliPort
+- Bluetooth
+- AirDrop discovery, sending and receiving files
+- Internal speakers and headphone output
+- Graphics acceleration
+- Keyboard, Fn keys and trackpad
+- Built-in webcam
+- USB ports and HDMI
+- Apple Account, iCloud and App Store
 
-### How to Generate a New SMBIOS
+All of the above have been tested on my own laptop. Other MateBook D15 configurations may behave differently.
 
-1.  Download [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS).
-2.  Run the script.
-3.  Select option 1: **"Download/Update MacSerial"**.
-4.  Select option 3: **"Generate SMBIOS"**.
-5.  When asked for a model, type `MacBookPro16,3` (this is a good match for your 10th-gen i3 CPU).
-6.  The script will generate a **Serial**, **Board Serial (MLB)**, and **SmUUID**.
-7.  Open your `EFI/OC/config.plist` with a plist editor (like ProperTree or OCAT).
-8.  Go to the `PlatformInfo > Generic` section.
-9.  Copy and paste the generated values into the following fields:
-      * `SystemSerialNumber` -\> **Serial**
-      * `MLB` -\> **Board Serial**
-      * `SystemUUID` -\> **SmUUID**
-10. Save the `config.plist` file, and you are ready to boot.
+## What's Changed
 
------
+On my previous Tahoe setup, Wi-Fi required `itlwm` and HeliPort. Bluetooth and AirDrop weren't working, and the internal speakers had no sound.
 
-## Hardware Specifications
+The audio issue was the hardest part to fix. This laptop uses the Everest ESSX8336 codec with Intel SST, so the usual AppleALC and VoodooHDA methods weren't enough.
 
-| Component | Model |
-| :--- | :--- |
-| **Processor** | Intel Core i3-10110U @ 2.10GHz |
-| **Graphics** | Intel UHD Graphics |
-| **RAM** | 8GB (Onboard) |
-| **Storage** | Samsung SSD 990 Evo plus 1TB |
-| **Wireless** | Intel Wireless-AC 9560 160MHz |
-| **Audio** | Everest ESSX8336 (Intel SST) - **Not Supported** |
+On Sonoma, the internal speakers and headphone output now work. Wi-Fi is also recognized natively by macOS, Bluetooth works, and I've tested AirDrop transfers in both directions.
 
------
+No hardware replacement was needed.
 
-## 📝 General Notes
+## Performance
 
-This EFI was created after an update from macOS Ventura. It felt a bit laggy at first, as most of the Kexts had to be changed, and the data migration was minimal (almost like a clean install).
+For an older dual-core i3 with 8 GB RAM, Sonoma runs surprisingly well. Web browsing, YouTube, music, movies and documents are all comfortable to use.
 
-In general use, it's quite smooth. Due to the low 8GB of RAM and older i3 CPU, it can stutter under very heavy loads. However, for light tasks like typing, general studying, or even editing FHD 60fps video, it works comfortably.
+It's not a performance machine, but it's still perfectly usable for everyday tasks.
 
------
+## Before Using This EFI
 
-## 💻 System Status
+**Generate your own SMBIOS values before booting.**
 
-### ✅ What Works
+The shared EFI contains placeholder values. Do not use them as your machine identity.
 
-  * **Wi-Fi:** Functional via `itlwm.kext` and the [HeliPort](https://github.com/OpenIntelWireless/HeliPort) app.
-  * **Keyboard & Trackpad:** Functions perfectly, including all Fn keys.
-  * **Webcam:** Working.
-  * **Ports:** All USB ports and the HDMI port are working.
-  * **iServices:** iCloud login and App Store downloads work (after generating your own SMBIOS).
-  * **Hardware Info:** CPU and iGPU information (i3-10110U, Intel UHD) display correctly.
+1. Back up your current EFI.
+2. Download [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS).
+3. Generate new values for the SMBIOS model used by this configuration (`MacBookPro15,4`).
+4. Open `EFI/OC/config.plist` and update `PlatformInfo -> Generic`.
+5. Set your own `SystemSerialNumber`, `MLB`, `SystemUUID` and `ROM`.
+6. Test the EFI from a USB drive before replacing your working configuration.
 
-### ❌ What Doesn't Work / Issues
+**Compatibility notes:**
 
-  * **Native Wi-Fi Interface:** The default macOS Wi-Fi menu does not work. You **must** use the HeliPort app to connect to Wi-Fi.
-  * **Bluetooth:** Not working. May require an external USB Bluetooth adapter or further USB port mapping.
-  * **AUDIO (NOT WORKING):**
-      * The built-in **Everest ESSX8336 (Intel SST) audio chip is NOT SUPPORTED** in macOS.
-      * Attempts with SOF, VoodooHDA, and AppleHDA patches were all unsuccessful.
-      * **You must use an external USB sound card or USB/Bluetooth headphones for all audio.**
-  * **Apple Continuity:** AirDrop, CarPlay, Handoff, and other continuity features are not functional.
+- This EFI was tested on macOS Sonoma 14.8.9 (23J631).
+- Compatibility with Tahoe or other macOS versions is not guaranteed.
+- Some features may depend on system-level patches as well as the EFI.
+- Check the installed Kexts and patch requirements before using it.
+- Keep a backup of your existing EFI in case you need to roll back.
+
+## Downloads
+
+Check the [Releases](../../releases) page for available EFI builds.
+
+The older Tahoe configuration is kept for reference. The current tested setup is **Sonoma 14.8.9**.
+
+## Disclaimer
+
+This is my personal Hackintosh setup, shared for anyone working on the same laptop. I can't guarantee that everything will work on another machine without changes.
+
+Please back up your EFI before trying it.
